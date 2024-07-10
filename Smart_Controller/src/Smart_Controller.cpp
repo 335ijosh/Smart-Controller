@@ -20,8 +20,6 @@ SYSTEM_MODE(MANUAL);
 
 const int trigPin = D16;  
 const int echoPin = D9;
-const int TRIGPIN=D3;
-const int ECHOPIN=D2;
 float duration, distance;
 
 Adafruit_BME280 bme;
@@ -54,9 +52,11 @@ Button greybutton(ENCODERPIN);
 
 const int MYWEMO=1;
 const int MYWEMO1=2;
-int BUTTON_PIN=D18;
+int BUTTON_PIN=D10;
+bool buttonstate;
 Button whitebutton(BUTTON_PIN);
 
+int mode;
 
 void setup() {
     Serial.begin(9600); 
@@ -72,10 +72,7 @@ void setup() {
   Serial.printf("\n\n");
 
 pinMode(trigPin, OUTPUT);  
-	pinMode(echoPin, INPUT);  
-	Serial.begin(9600);
-  pinMode(TRIGPIN, OUTPUT);  
-	pinMode(ECHOPIN, INPUT);  
+	pinMode(echoPin, INPUT);
 	Serial.begin(9600);
 
   bme.begin(0x76); 
@@ -99,9 +96,9 @@ Serial.printf("BME280 at address 0x%02X failed to start", 0x76);
 // loop() runs over and over again, as quickly as it can execute.
 void loop() {
  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
+  delay(5000);
   digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
+  delay(5000);
   digitalWrite(trigPin, LOW);
   duration = pulseIn(echoPin, HIGH);
   distance = (duration*.0343)/2;
@@ -109,16 +106,6 @@ void loop() {
   Serial.println(distance);
   delay(100);
 
-   digitalWrite(TRIGPIN, LOW);
-  delayMicroseconds(2);
-  digitalWrite(TRIGPIN, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(TRIGPIN, LOW);
-  duration = pulseIn(ECHOPIN, HIGH);
-  distance = (duration*.0343)/2;
-  Serial.print("Distance2: ");
-  Serial.println(distance);
-  delay(100);
 
   currentTime = millis();
 if((currentTime-lastSec)>2000){ 
@@ -187,15 +174,33 @@ setHue(BULB,false,HueRainbow[color%7],pp,255);
     
  if(whitebutton.isClicked()){
    on =!on;
-if (on)
-  {
-             wemoWrite(MYWEMO,HIGH);
+        if (  mode>3)
+        {
+            mode=0;
+        }
+      mode++;
+        if((mode==0)){
+          wemoWrite(MYWEMO,HIGH);
+          wemoWrite(MYWEMO1,LOW);
+        }
+         if((mode==1)){
+          wemoWrite(MYWEMO,HIGH);
+          wemoWrite(MYWEMO1,HIGH);
+        }
+         if((mode==2)){
+          wemoWrite(MYWEMO,LOW);
+          wemoWrite(MYWEMO1,HIGH);
+        }
+         if((mode==3)){
+          wemoWrite(MYWEMO,LOW);
+          wemoWrite(MYWEMO1,LOW);
+         }
+     Serial.printf("mode %i\n",mode);
      Serial.printf("Turning on Wemo# %i\n",MYWEMO);
+
   }
   else
   {
     wemoWrite(MYWEMO,LOW);
-  }
-
   }
 }
