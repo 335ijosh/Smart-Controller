@@ -11,10 +11,12 @@
 #include "Adafruit_BME280.h"
 #include "Adafruit_SSD1306.h"
 #include "Colors.h"
+#include "Encoder.h"
+#include "IoTClassroom_CNM.h"
 
 
 // Let Device OS manage the connection to the Particle Cloud
-SYSTEM_MODE(SEMI_AUTOMATIC);
+SYSTEM_MODE(MANUAL);
 
 const int trigPin = D16;  
 const int echoPin = D9;
@@ -31,8 +33,44 @@ int status;
 int lastSecond;
 int i;
 int position;
+const int brightness=255;
+
+Encoder myEnc(D17,D15);
+int inputValue;
+int LEDSwitch;
+const int Switch=D6;
+const int REDLED=D4;
+const int GREENLED=D5;
+const int BLUELED=D7;
+
+
+const int BULB=2; 
+int perviousPosition;
+int pp;
+int color;
+bool on,off;
+const int ENCODERPIN=D6;
+Button greybutton(ENCODERPIN);
+
+const int MYWEMO=1;
+const int MYWEMO1=2;
+int BUTTON_PIN=D18;
+Button whitebutton(BUTTON_PIN);
+
 
 void setup() {
+    Serial.begin(9600); 
+  waitFor(Serial.isConnected,15000);
+    WiFi.on();
+  WiFi.clearCredentials();
+  WiFi.setCredentials("IoTNetwork");
+  
+  WiFi.connect();
+  while(WiFi.connecting()) {
+    Serial.printf(".");
+  }
+  Serial.printf("\n\n");
+
 pinMode(trigPin, OUTPUT);  
 	pinMode(echoPin, INPUT);  
 	Serial.begin(9600);
@@ -54,6 +92,7 @@ Serial.printf("BME280 at address 0x%02X failed to start", 0x76);
   display.setTextSize(1);
   display.setTextColor(WHITE);
   display.setCursor(0,0);
+
 
 }
 
@@ -97,4 +136,66 @@ float humidRH = bme.readHumidity();
   display.display();
   display.clearDisplay();
 }
+
+ position = myEnc.read();
+     if (position!=perviousPosition)
+{
+              pp=2.6*position;
+              Serial.printf("i = %d,\n",position);
+     perviousPosition= position;
+     setHue(BULB,true,HueRainbow[color%7],pp,255);
+}
+  if (position >brightness)
+{
+   position =brightness;
+   myEnc.write(brightness);
+         Serial.printf("i = %d,\n",position);
+}
+if (position <0)
+{
+   position=0;
+   myEnc.write(0);
+        Serial.printf("i = %d,\n",position);
+}
+ if (LEDSwitch==true)
+  {
+    digitalWrite(GREENLED,LOW);
+  }
+else {
+digitalWrite(REDLED,LOW);
+}
+   analogWrite(Switch,inputValue);
+position =myEnc.read();
+ inputValue = digitalRead(D3);
+  Serial.printf("button state = %i,\n",inputValue);
+
+      if(greybutton.isClicked()){
+   on =!on;
+ Serial.printf("Setting color of bulb %i to color %06i\n",BULB,HueRainbow[color%7]);
+  setHue(BULB,true,HueRainbow[color%7],pp,255);
+  color++;
+   if (on)
+  {
+setHue(BULB,true,HueRainbow[color%7],pp,255);
+  color++;
+  }
+    else
+  {
+setHue(BULB,false,HueRainbow[color%7],pp,255);
+  }
+    }
+    
+ if(whitebutton.isClicked()){
+   on =!on;
+if (on)
+  {
+             wemoWrite(MYWEMO,HIGH);
+     Serial.printf("Turning on Wemo# %i\n",MYWEMO);
+  }
+  else
+  {
+    wemoWrite(MYWEMO,LOW);
+  }
+
+  }
 }
