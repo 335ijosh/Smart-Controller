@@ -57,6 +57,8 @@ bool buttonstate;
 Button whitebutton(BUTTON_PIN);
 
 int mode;
+int timer;
+int CURRENTTIME;
 
 void setup() {
     Serial.begin(9600); 
@@ -96,15 +98,29 @@ Serial.printf("BME280 at address 0x%02X failed to start", 0x76);
 // loop() runs over and over again, as quickly as it can execute.
 void loop() {
  digitalWrite(trigPin, LOW);
-  delay(5000);
+  delayMicroseconds(5000);
   digitalWrite(trigPin, HIGH);
-  delay(5000);
+  delayMicroseconds(5000);
   digitalWrite(trigPin, LOW);
   duration = pulseIn(echoPin, HIGH);
   distance = (duration*.0343)/2;
   Serial.print("Distance: ");
   Serial.println(distance);
-  delay(100);
+  delayMicroseconds(5000);
+   
+    CURRENTTIME = millis();
+if((CURRENTTIME-timer)>9000){ 
+  timer = millis();
+  if (distance<=100)
+  {
+  setHue(BULB,true,HueRainbow[color%7],pp,150);
+  }
+  else
+  {
+     setHue(BULB,false,HueRainbow[color%7],pp,150);
+    }
+}
+
 
 
   currentTime = millis();
@@ -112,9 +128,9 @@ if((currentTime-lastSec)>2000){
   lastSec = millis();
  float tempC = bme.readTemperature();
  float tempF= 1.8*tempC+32;
-float pressPA = bme.readPressure();
-float inHg= 1/3386.0*pressPA+5;
-float humidRH = bme.readHumidity();
+  float pressPA = bme.readPressure();
+  float inHg= 1/3386.0*pressPA+5;
+  float humidRH = bme.readHumidity();
  Serial.printf("Temperature%0.2f\n,Pressure%0.2f\n,Humidity%0.2f\n" ,tempF,pressPA,humidRH );
  display.setTextSize(1);
   display.setTextColor(WHITE);
@@ -178,7 +194,6 @@ setHue(BULB,false,HueRainbow[color%7],pp,255);
         {
             mode=0;
         }
-      mode++;
         if((mode==0)){
           wemoWrite(MYWEMO,HIGH);
           wemoWrite(MYWEMO1,LOW);
@@ -195,12 +210,10 @@ setHue(BULB,false,HueRainbow[color%7],pp,255);
           wemoWrite(MYWEMO,LOW);
           wemoWrite(MYWEMO1,LOW);
          }
+               mode++;
      Serial.printf("mode %i\n",mode);
      Serial.printf("Turning on Wemo# %i\n",MYWEMO);
 
   }
-  else
-  {
-    wemoWrite(MYWEMO,LOW);
-  }
+
 }
