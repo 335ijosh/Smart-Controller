@@ -49,6 +49,7 @@ int color;
 bool on,off;
 const int ENCODERPIN=D6;
 Button greybutton(ENCODERPIN);
+int PP;
 
 const int MYWEMO=1;
 const int MYWEMO1=2;
@@ -92,6 +93,8 @@ Serial.printf("BME280 at address 0x%02X failed to start", 0x76);
   display.setTextColor(WHITE);
   display.setCursor(0,0);
 
+pinMode(GREENLED,OUTPUT);
+pinMode(REDLED,OUTPUT);
 
 }
 
@@ -113,11 +116,14 @@ if((CURRENTTIME-timer)>9000){
   timer = millis();
   if (distance<=100)
   {
-  setHue(BULB,true,HueRainbow[color%7],pp,150);
+  setHue(BULB,true,HueRainbow[color%7],PP,250);
+    digitalWrite(GREENLED,LOW);
+    Serial.printf("led color = %i,\n",inputValue);
   }
   else
   {
-     setHue(BULB,false,HueRainbow[color%7],pp,150);
+     setHue(BULB,false,HueRainbow[color%7],PP,250);
+     digitalWrite(REDLED,LOW);
     }
 }
 
@@ -159,13 +165,6 @@ if (position <0)
    position=0;
    myEnc.write(0);
         Serial.printf("i = %d,\n",position);
-}
- if (LEDSwitch==true)
-  {
-    digitalWrite(GREENLED,LOW);
-  }
-else {
-digitalWrite(REDLED,LOW);
 }
    analogWrite(Switch,inputValue);
 position =myEnc.read();
