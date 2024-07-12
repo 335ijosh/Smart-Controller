@@ -53,7 +53,7 @@ int PP;
 
 const int MYWEMO=1;
 const int MYWEMO1=2;
-int BUTTON_PIN=D10;
+int BUTTON_PIN=D14;
 bool buttonstate;
 Button whitebutton(BUTTON_PIN);
 
@@ -118,12 +118,14 @@ if((CURRENTTIME-timer)>9000){
   {
   setHue(BULB,true,HueRainbow[color%7],PP,250);
     digitalWrite(GREENLED,LOW);
+    digitalWrite(REDLED,HIGH);
     Serial.printf("led color = %i,\n",inputValue);
   }
   else
   {
      setHue(BULB,false,HueRainbow[color%7],PP,250);
      digitalWrite(REDLED,LOW);
+     digitalWrite(GREENLED,HIGH);
     }
 }
 
