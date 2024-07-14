@@ -78,7 +78,7 @@ pinMode(trigPin, OUTPUT);
 	pinMode(echoPin, INPUT);
 	Serial.begin(9600);
 
-  bme.begin(0x76); 
+  status=bme.begin(0x76); 
  Serial.begin (9600);
  waitFor (Serial .isConnected ,10000);
  Serial.println ("ready to go");
@@ -116,14 +116,14 @@ if((CURRENTTIME-timer)>9000){
   timer = millis();
   if (distance<=100)
   {
-  setHue(BULB,true,HueRainbow[color%7],PP,250);
+  setHue(BULB,true,HueRainbow[color%7],pp,250);
     digitalWrite(GREENLED,LOW);
     digitalWrite(REDLED,HIGH);
     Serial.printf("led color = %i,\n",inputValue);
   }
   else
   {
-     setHue(BULB,false,HueRainbow[color%7],PP,250);
+     setHue(BULB,false,HueRainbow[color%7],pp,250);
      digitalWrite(REDLED,LOW);
      digitalWrite(GREENLED,HIGH);
     }
